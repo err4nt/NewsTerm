@@ -1,0 +1,38 @@
+﻿<Page
+    x:Class="NewsTerm_Universal.DetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NewsTerm_Universal"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="PageRoot"
+    NavigationCacheMode="Enabled"
+    Loaded="PageRoot_Loaded"
+    Unloaded="PageRoot_Unloaded"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Transitions>
+        <TransitionCollection>
+            <NavigationThemeTransition />
+        </TransitionCollection>
+    </Page.Transitions>
+
+    <Grid x:Name="RootPanel" x:DeferLoadStrategy="Lazy">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock
+            Margin="0,8"
+            Grid.Row="0"
+            Style="{ThemeResource TitleTextBlockStyle}"
+            HorizontalAlignment="Left"
+            Text="{x:Bind Item.title, Mode=OneWay}" />
+        <WebView
+            local:WebViewHelper.Html="{x:Bind Item.body, Mode=OneWay}"
+            Margin="0,9" 
+            Grid.Row="1" 
+            ScriptNotify="WebView_ScriptNotify"/>
+    </Grid>
+</Page>
