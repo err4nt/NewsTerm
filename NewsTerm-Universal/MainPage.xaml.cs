@@ -28,10 +28,7 @@ namespace NewsTerm_Universal
     public sealed partial class MainPage : Page
     {
         private ItemModel _lastSelectedItem;
-        private ObservableCollection<ItemModel> _items;
         Windows.Storage.ApplicationDataContainer localSettings;
-        NextcloudNewsInterface.NextcloudNewsInterface newsInterface;
-        NextcloudNewsInterface.NextcloudNewsFeeds feeds;
 
         public MainPage()
         {
@@ -39,118 +36,79 @@ namespace NewsTerm_Universal
             localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
             refreshButton.Click += RefreshButton_Click;
-            _items = new ObservableCollection<ItemModel>();
 
-            MasterListView.ItemsSource = _items;
-        }
-
-        private async void Refresh()
-        {
-            var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
-
-            foreach (var item in backendItems.items)
-            {
-                var existingItem = (from ItemModel selitem in _items where selitem.id == item.id select selitem).FirstOrDefault<ItemModel>();
-                if (existingItem == null)
-                {
-                    var newItem = ItemModel.FromItem(item);
-                    var feed = feeds.getFeedForId(item.feedId);
-                    if (feed != null)
-                        newItem.favicon = feed.faviconLink;
-                    else
-                        newItem.favicon = "https://boingboing.net/favicon.ico";
-                    _items.Insert(0, newItem);
-                }
-            }
+            MasterListView.ItemsSource = ItemList.getInstance().Items;
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            Refresh();
+            ItemList.getInstance().Refresh();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
-            if (!(localSettings.Values.ContainsKey("username") &&
-                  localSettings.Values.ContainsKey("password") &&
-                  localSettings.Values.ContainsKey("host")))
+            if (e.Parameter != null && e.Parameter as String != String.Empty)
             {
-                //TODO: Pop up a dialog asking for login information
-                var dialog = new ContentDialog()
+                var selectedItem = ItemList.getInstance().GetItemById((int)e.Parameter);
+                if (selectedItem != null)
                 {
-                    Title = "Nextcloud News Login",
-                    MaxWidth = this.ActualWidth
-                };
-
-                var panel = new StackPanel();
-
-                var hostBox = new TextBox()
-                {
-                    PlaceholderText = "https://yourdomain.tld"
-                };
-                var usernameBox = new TextBox()
-                {
-                    PlaceholderText = "username"
-                };
-                var passwordBox = new PasswordBox()
-                {
-                    PlaceholderText = "password"
-                };
-
-                panel.Children.Add(hostBox);
-                panel.Children.Add(usernameBox);
-                panel.Children.Add(passwordBox);
-
-                dialog.Content = panel;
-                dialog.PrimaryButtonText = "Log in";
-                dialog.IsPrimaryButtonEnabled = true;
-                dialog.PrimaryButtonClick += delegate
-                {
-                    localSettings.Values["host"] = hostBox.Text;
-                    localSettings.Values["username"] = usernameBox.Text;
-                    localSettings.Values["password"] = passwordBox.Password;
-                };
-
-                dialog.SecondaryButtonText = "Cancel";
-
-                var result = await dialog.ShowAsync();
+                    MasterListView.SelectedItem = selectedItem;
+                }
             }
-
-            newsInterface = NextcloudNewsInterface.NextcloudNewsInterface.getInstance(localSettings.Values["host"] as String,
-                                                                                      localSettings.Values["username"] as String,
-                                                                                      localSettings.Values["password"] as String);
-
-            var items = MasterListView.ItemsSource as List<ItemModel>;
-
-            feeds = await newsInterface.getFeeds();
-
-            if (items == null)
+            else
             {
-                items = new List<ItemModel>();
-                var backendItems = await newsInterface.getItems();
-
-                foreach (var item in backendItems.items)
+                if (!(localSettings.Values.ContainsKey("username") &&
+                      localSettings.Values.ContainsKey("password") &&
+                      localSettings.Values.ContainsKey("host")))
                 {
-                    var newItem = ItemModel.FromItem(item);
-                    var feed = feeds.getFeedForId(item.feedId);
-                    if (feed != null)
-                        newItem.favicon = feed.faviconLink;
-                    else
-                        newItem.favicon = "https://boingboing.net/favicon.ico";
-                    items.Add(newItem);
+                    //TODO: Pop up a dialog asking for login information
+                    var dialog = new ContentDialog()
+                    {
+                        Title = "Nextcloud News Login",
+                        MaxWidth = this.ActualWidth
+                    };
+
+                    var panel = new StackPanel();
+
+                    var hostBox = new TextBox()
+                    {
+                        PlaceholderText = "https://yourdomain.tld"
+                    };
+                    var usernameBox = new TextBox()
+                    {
+                        PlaceholderText = "username"
+                    };
+                    var passwordBox = new PasswordBox()
+                    {
+                        PlaceholderText = "password"
+                    };
+
+                    panel.Children.Add(hostBox);
+                    panel.Children.Add(usernameBox);
+                    panel.Children.Add(passwordBox);
+
+                    dialog.Content = panel;
+                    dialog.PrimaryButtonText = "Log in";
+                    dialog.IsPrimaryButtonEnabled = true;
+                    dialog.PrimaryButtonClick += delegate
+                    {
+                        localSettings.Values["host"] = hostBox.Text;
+                        localSettings.Values["username"] = usernameBox.Text;
+                        localSettings.Values["password"] = passwordBox.Password;
+                    };
+
+                    dialog.SecondaryButtonText = "Cancel";
+
+                    var result = await dialog.ShowAsync();
                 }
 
-                MasterListView.ItemsSource = items;
-            }
+                NextcloudNewsInterface.NextcloudNewsInterface.getInstance(localSettings.Values["host"] as String,
+                                                                          localSettings.Values["username"] as String,
+                                                                          localSettings.Values["password"] as String);
 
-            if (e.Parameter != null)
-            {
-                // Parameter is item ID
-                var id = e.Parameter;
-                //_lastSelectedItem =
-                //    items.Where((item) => item.id == id).FirstOrDefault();
+                ItemList.getInstance().Refresh();
             }
 
             UpdateForVisualState(AdaptiveStates.CurrentState);
@@ -237,29 +195,27 @@ namespace NewsTerm_Universal
 
         private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            var item = args.NewValue as ItemModel;
+            var newItem = args.NewValue as ItemModel;
 
-            if(_lastSelectedItem != null && item != null)
+            if (AdaptiveStates.CurrentState != NarrowState)
             {
-                var t = Task.Run(async delegate
+                if (_lastSelectedItem != null)
                 {
-                    var newsif = NextcloudNewsInterface.NextcloudNewsInterface.getInstance();
-                    newsif.markItemRead((await newsif.getItems()).getForId(_lastSelectedItem.id));
-                });
-                var items = MasterListView.ItemsSource as List<ItemModel>;
-                items.Remove(_lastSelectedItem);
-            }
+                    ItemList.getInstance().MarkItemRead(_lastSelectedItem);
+                }
+                else if(newItem != null)
+                {
+                    ItemList.getInstance().MarkItemRead(newItem);
+                }
 
-            if(item != null)
-            {
-                _lastSelectedItem = item;
-                //NextcloudNewsItem newsItem = newsInterface.getItems().getForId(item.id);
+                if(newItem != null)
+                    _lastSelectedItem = newItem;
             }
         }
 
         private void MasterListView_RefreshRequested(object sender, RefreshRequestedEventArgs e)
         {
-            Refresh();
+            ItemList.getInstance().Refresh();
         }
     }
 }

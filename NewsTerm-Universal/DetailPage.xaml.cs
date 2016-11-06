@@ -29,7 +29,6 @@ namespace NewsTerm_Universal
         private static DependencyProperty s_itemProperty
             = DependencyProperty.Register("Item", typeof(ItemModel), typeof(DetailPage), new PropertyMetadata(null));
 
-        private int selectedIndex;
         private List<NextcloudNewsInterface.NextcloudNewsItem> items;
 
         public static DependencyProperty ItemProperty
@@ -48,15 +47,16 @@ namespace NewsTerm_Universal
             this.InitializeComponent();
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
-            items = new List<NextcloudNewsInterface.NextcloudNewsItem>((await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).items);
-            var rawItem = (await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).getForId((int)e.Parameter);
-            selectedIndex = items.FindIndex( x => x.id == rawItem.id );
-            Item = ItemModel.FromItem(rawItem);
-            NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(rawItem);
+            var selItem = ItemList.getInstance().GetItemById((int)e.Parameter);
+            if (selItem != null)
+            {
+                Item = selItem;
+                ItemList.getInstance().MarkItemRead(selItem);
+            }
 
             var backStack = Frame.BackStack;
             var backStackCount = backStack.Count;
@@ -158,16 +158,17 @@ namespace NewsTerm_Universal
             var type = e.Value;
             if (type == "left")
             {
-                if(selectedIndex < items.Count)
-                    selectedIndex++;
+                var newItem = ItemList.getInstance().GetNextItem(Item);
+                if (newItem != null)
+                    Item = newItem;
             }
             else if (type == "right")
             {
-                if (selectedIndex > 0)
-                    selectedIndex--;
+                var newItem = ItemList.getInstance().GetPreviousItem(Item);
+                if (newItem != null)
+                    Item = newItem;
             }
-            Item = ItemModel.FromItem(items[selectedIndex]);
-            NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(items[selectedIndex]);
+            ItemList.getInstance().MarkItemRead(Item);
         }
 
         private void DetailPage_BackRequested(object sender, BackRequestedEventArgs e)
