@@ -119,7 +119,7 @@ namespace NextcloudNewsInterface
             request.Headers["Authorization"] = "Basic " + hash;
             using (var writer = new StreamWriter(await request.GetRequestStreamAsync()))
             {
-                var payload = String.Format("{{items: [{0}]}}", item.id);
+                var payload = String.Format("{{\"items\": [{0}]}}", item.id);
                 writer.Write(payload);
             }
             using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)

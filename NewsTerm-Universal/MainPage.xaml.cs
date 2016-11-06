@@ -2,6 +2,7 @@
 using NextcloudNewsInterface;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -27,7 +28,7 @@ namespace NewsTerm_Universal
     public sealed partial class MainPage : Page
     {
         private ItemModel _lastSelectedItem;
-        Point initialPoint;
+        private ObservableCollection<ItemModel> _items;
         Windows.Storage.ApplicationDataContainer localSettings;
         NextcloudNewsInterface.NextcloudNewsInterface newsInterface;
         NextcloudNewsInterface.NextcloudNewsFeeds feeds;
@@ -38,29 +39,34 @@ namespace NewsTerm_Universal
             localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
             refreshButton.Click += RefreshButton_Click;
+            _items = new ObservableCollection<ItemModel>();
+
+            MasterListView.ItemsSource = _items;
         }
 
-        private async void RefreshButton_Click(object sender, RoutedEventArgs e)
+        private async void Refresh()
         {
-            newsInterface = new NextcloudNewsInterface.NextcloudNewsInterface(localSettings.Values["host"] as String,
-                                                                              localSettings.Values["username"] as String,
-                                                                              localSettings.Values["password"] as String);
-
-            var items = new List<ItemModel>();
-            var backendItems = await newsInterface.getItems();
+            var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
 
             foreach (var item in backendItems.items)
             {
-                var newItem = ItemModel.FromItem(item);
-                var feed = feeds.getFeedForId(item.feedId);
-                if (feed != null)
-                    newItem.favicon = feed.faviconLink;
-                else
-                    newItem.favicon = "https://boingboing.net/favicon.ico";
-                items.Add(newItem);
+                var existingItem = (from ItemModel selitem in _items where selitem.id == item.id select selitem).FirstOrDefault<ItemModel>();
+                if (existingItem == null)
+                {
+                    var newItem = ItemModel.FromItem(item);
+                    var feed = feeds.getFeedForId(item.feedId);
+                    if (feed != null)
+                        newItem.favicon = feed.faviconLink;
+                    else
+                        newItem.favicon = "https://boingboing.net/favicon.ico";
+                    _items.Insert(0, newItem);
+                }
             }
+        }
 
-            MasterListView.ItemsSource = items;
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            Refresh();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -232,7 +238,7 @@ namespace NewsTerm_Universal
             }
         }
 
-        private async void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
             var item = args.NewValue as ItemModel;
 
@@ -252,6 +258,11 @@ namespace NewsTerm_Universal
                 _lastSelectedItem = item;
                 //NextcloudNewsItem newsItem = newsInterface.getItems().getForId(item.id);
             }
+        }
+
+        private void MasterListView_RefreshRequested(object sender, RefreshRequestedEventArgs e)
+        {
+            Refresh();
         }
     }
 }
