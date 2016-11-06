@@ -51,11 +51,10 @@ namespace NewsTerm_Universal
         {
             base.OnNavigatedTo(e);
 
-            var selItem = ItemList.getInstance().GetItemById((int)e.Parameter);
-            if (selItem != null)
+            if(ItemList.getInstance().SelectedItem != null)
             {
-                Item = selItem;
-                ItemList.getInstance().MarkItemRead(selItem);
+                Item = ItemList.getInstance().SelectedItem;
+                ItemList.getInstance().MarkItemRead(Item);
             }
 
             var backStack = Frame.BackStack;
@@ -158,15 +157,21 @@ namespace NewsTerm_Universal
             var type = e.Value;
             if (type == "left")
             {
-                var newItem = ItemList.getInstance().GetNextItem(Item);
+                var newItem = ItemList.getInstance().GetNextItem();
                 if (newItem != null)
+                {
                     Item = newItem;
+                    ItemList.getInstance().SelectedItem = newItem;
+                }
             }
             else if (type == "right")
             {
-                var newItem = ItemList.getInstance().GetPreviousItem(Item);
+                var newItem = ItemList.getInstance().GetPreviousItem();
                 if (newItem != null)
+                {
                     Item = newItem;
+                    ItemList.getInstance().SelectedItem = newItem;
+                }
             }
             ItemList.getInstance().MarkItemRead(Item);
         }

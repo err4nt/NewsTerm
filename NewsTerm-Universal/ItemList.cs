@@ -12,8 +12,10 @@ namespace NewsTerm_Universal
     {
         private ObservableCollection<ItemModel> _list;
         private static ItemList _instance = null;
+        private ItemModel _selectedItem = null;
 
         public ObservableCollection<ItemModel> Items { get {return _list;} }
+        public ItemModel SelectedItem { get { return _selectedItem; } set { _selectedItem = value; } }
 
         public static ItemList getInstance()
         {
@@ -61,9 +63,9 @@ namespace NewsTerm_Universal
             NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(rawItem);
         }
 
-        public ItemModel GetNextItem(ItemModel current)
+        public ItemModel GetNextItem()
         {
-            var index = _list.IndexOf(current)+1;
+            var index = _list.IndexOf(_selectedItem)+1;
             if(index < _list.Count)
             {
                 return _list[index];
@@ -71,9 +73,9 @@ namespace NewsTerm_Universal
             return null;
         }
 
-        public ItemModel GetPreviousItem(ItemModel current)
+        public ItemModel GetPreviousItem()
         {
-            var index = _list.IndexOf(current) - 1;
+            var index = _list.IndexOf(_selectedItem) - 1;
             if (index >= 0)
             {
                 return _list[index];

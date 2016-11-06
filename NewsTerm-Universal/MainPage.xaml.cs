@@ -27,7 +27,6 @@ namespace NewsTerm_Universal
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private ItemModel _lastSelectedItem;
         Windows.Storage.ApplicationDataContainer localSettings;
 
         public MainPage()
@@ -122,11 +121,11 @@ namespace NewsTerm_Universal
         {
             var isNarrow = newState == NarrowState;
 
-            if (isNarrow && oldState == DefaultState && _lastSelectedItem != null)
+            if (isNarrow && oldState == DefaultState && ItemList.getInstance().SelectedItem != null)
             {
                 // Resize down to the detail item. Don't play a transition.
-                Frame.Navigate(typeof(DetailPage), _lastSelectedItem.id, new SuppressNavigationTransitionInfo());
-            }
+                Frame.Navigate(typeof(DetailPage), null, new SuppressNavigationTransitionInfo());
+            } 
 
             EntranceNavigationTransitionInfo.SetIsTargetElement(MasterListView, isNarrow);
             if (DetailContentPresenter != null)
@@ -138,7 +137,8 @@ namespace NewsTerm_Universal
         private void LayoutRoot_Loaded(object sender, RoutedEventArgs e)
         {
             // Assure we are displaying the correct item. This is necessary in certain adaptive cases.
-            MasterListView.SelectedItem = _lastSelectedItem;
+            if(ItemList.getInstance().SelectedItem != null)
+                MasterListView.SelectedItem = ItemList.getInstance().SelectedItem;
         }
 
         private void AdaptiveStates_CurrentStateChanged(object sender, VisualStateChangedEventArgs e)
@@ -148,14 +148,13 @@ namespace NewsTerm_Universal
 
         private void MasterListView_ItemClick(object sender, ItemClickEventArgs e)
         {
+            var item = e.ClickedItem as ItemModel;
+            if (item != null)
+                ItemList.getInstance().SelectedItem = item;
             if(AdaptiveStates.CurrentState == NarrowState)
             {
-                var itemid = 0;
-                if (_lastSelectedItem == null)
-                    itemid = ((ItemModel)e.ClickedItem).id;
-                else
-                    itemid = _lastSelectedItem.id;
-                Frame.Navigate(typeof(DetailPage), itemid, new SuppressNavigationTransitionInfo());
+                //item.id is pretty useless here
+                Frame.Navigate(typeof(DetailPage), item.id, new SuppressNavigationTransitionInfo());
             }
             else
             {
@@ -197,19 +196,10 @@ namespace NewsTerm_Universal
         {
             var newItem = args.NewValue as ItemModel;
 
-            if (AdaptiveStates.CurrentState != NarrowState)
+            if(newItem != null)
             {
-                if (_lastSelectedItem != null)
-                {
-                    ItemList.getInstance().MarkItemRead(_lastSelectedItem);
-                }
-                else if(newItem != null)
-                {
-                    ItemList.getInstance().MarkItemRead(newItem);
-                }
-
-                if(newItem != null)
-                    _lastSelectedItem = newItem;
+                ItemList.getInstance().SelectedItem = newItem;
+                ItemList.getInstance().MarkItemRead(newItem);
             }
         }
 
