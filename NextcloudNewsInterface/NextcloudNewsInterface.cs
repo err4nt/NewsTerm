@@ -112,23 +112,27 @@ namespace NextcloudNewsInterface
 
         public async void markItemRead(NextcloudNewsItem item)
         {
-            HttpWebRequest request = WebRequest.Create(buildFullURL("items/read/multiple")) as HttpWebRequest;
-            request.Method = "PUT";
-            request.ContentType = "application/json";
-            String hash = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
-            request.Headers["Authorization"] = "Basic " + hash;
-            using (var writer = new StreamWriter(await request.GetRequestStreamAsync()))
+            if (item.unread)
             {
-                var payload = String.Format("{{\"items\": [{0}]}}", item.id);
-                writer.Write(payload);
-            }
-            using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
-            {
-                if (response.StatusCode != HttpStatusCode.OK)
-                    throw new Exception(String.Format(
-                        "Server error (HTTP {0}: {1}).",
-                        response.StatusCode,
-                        response.StatusDescription));
+                HttpWebRequest request = WebRequest.Create(buildFullURL("items/read/multiple")) as HttpWebRequest;
+                request.Method = "PUT";
+                request.ContentType = "application/json";
+                String hash = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+                request.Headers["Authorization"] = "Basic " + hash;
+                using (var writer = new StreamWriter(await request.GetRequestStreamAsync()))
+                {
+                    var payload = String.Format("{{\"items\": [{0}]}}", item.id);
+                    writer.Write(payload);
+                }
+                using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
+                {
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        throw new Exception(String.Format(
+                            "Server error (HTTP {0}: {1}).",
+                            response.StatusCode,
+                            response.StatusDescription));
+                }
+                item.unread = false;
             }
         }
     }

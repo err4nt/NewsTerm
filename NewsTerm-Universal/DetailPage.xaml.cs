@@ -8,6 +8,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
+using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
@@ -27,6 +28,9 @@ namespace NewsTerm_Universal
     {
         private static DependencyProperty s_itemProperty
             = DependencyProperty.Register("Item", typeof(ItemModel), typeof(DetailPage), new PropertyMetadata(null));
+
+        private int selectedIndex;
+        private List<NextcloudNewsInterface.NextcloudNewsItem> items;
 
         public static DependencyProperty ItemProperty
         {
@@ -48,7 +52,9 @@ namespace NewsTerm_Universal
         {
             base.OnNavigatedTo(e);
 
+            items = new List<NextcloudNewsInterface.NextcloudNewsItem>((await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).items);
             var rawItem = (await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).getForId((int)e.Parameter);
+            selectedIndex = items.FindIndex( x => x.id == rawItem.id );
             Item = ItemModel.FromItem(rawItem);
             NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(rawItem);
 
@@ -152,13 +158,16 @@ namespace NewsTerm_Universal
             var type = e.Value;
             if (type == "left")
             {
-                //MasterListView.SelectedIndex++;
+                if(selectedIndex < items.Count)
+                    selectedIndex++;
             }
             else if (type == "right")
             {
-                //if (MasterListView.SelectedIndex > 0)
-                //    MasterListView.SelectedIndex--;
+                if (selectedIndex > 0)
+                    selectedIndex--;
             }
+            Item = ItemModel.FromItem(items[selectedIndex]);
+            NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(items[selectedIndex]);
         }
 
         private void DetailPage_BackRequested(object sender, BackRequestedEventArgs e)
