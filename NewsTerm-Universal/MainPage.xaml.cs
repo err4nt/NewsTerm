@@ -167,7 +167,7 @@ namespace NewsTerm_Universal
             if (isNarrow && oldState == DefaultState && _lastSelectedItem != null)
             {
                 // Resize down to the detail item. Don't play a transition.
-                //Frame.Navigate(typeof(DetailPage), _lastSelectedItem.ItemId, new SuppressNavigationTransitionInfo());
+                Frame.Navigate(typeof(DetailPage), _lastSelectedItem.id, new SuppressNavigationTransitionInfo());
             }
 
             EntranceNavigationTransitionInfo.SetIsTargetElement(MasterListView, isNarrow);
@@ -190,9 +190,6 @@ namespace NewsTerm_Universal
 
         private void MasterListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            //var clickedItem = (ItemModel)e.ClickedItem;
-            //_lastSelectedItem = clickedItem;
-
             if(AdaptiveStates.CurrentState == NarrowState)
             {
                 var itemid = 0;

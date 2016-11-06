@@ -48,7 +48,9 @@ namespace NewsTerm_Universal
         {
             base.OnNavigatedTo(e);
 
-            Item = ItemModel.FromItem((await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).getForId((int)e.Parameter));
+            var rawItem = (await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).getForId((int)e.Parameter);
+            Item = ItemModel.FromItem(rawItem);
+            NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(rawItem);
 
             var backStack = Frame.BackStack;
             var backStackCount = backStack.Count;
