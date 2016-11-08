@@ -43,10 +43,24 @@ namespace NewsTerm_Universal
                 {
                     var newItem = ItemModel.FromItem(item);
                     var feed = feeds.getFeedForId(item.feedId);
+
                     if (feed != null)
-                        newItem.favicon = feed.faviconLink;
-                    else
-                        newItem.favicon = "https://boingboing.net/favicon.ico";
+                        if(feed.faviconLink != null && feed.faviconLink != String.Empty)
+                        {
+                            Uri validatedUri;
+                            if(Uri.TryCreate(feed.faviconLink, UriKind.RelativeOrAbsolute, out validatedUri))
+                            {
+                                newItem.favicon = feed.faviconLink;
+                            }
+                            else
+                            {
+                                newItem.favicon = "https://boingboing.net/favicon.ico";
+                            }
+                        }
+                        else
+                        {
+                            newItem.favicon = "https://boingboing.net/favicon.ico";
+                        }
                     _list.Insert(0, newItem);
                 }
             }

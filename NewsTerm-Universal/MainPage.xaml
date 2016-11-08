@@ -84,7 +84,7 @@
             <AppBarButton x:Name="settingsButton" Label="Settings" Icon="Setting" />
         </CommandBar>
 
-        <local:RefreshableListView
+        <!--<local:RefreshableListView
             x:Name="MasterListView"
             Grid.Row="0"
             ItemContainerTransitions="{x:Null}"
@@ -97,9 +97,9 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </local:RefreshableListView.ItemContainerStyle>
-        </local:RefreshableListView>
-        
-        <!--<ListView
+        </local:RefreshableListView>-->
+
+        <ListView
             x:Name="MasterListView"
             Grid.Row="0"
             ItemContainerTransitions="{x:Null}"
@@ -111,7 +111,7 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </ListView.ItemContainerStyle>
-        </ListView>-->
+        </ListView>
 
         <ContentPresenter
             x:Name="DetailContentPresenter"
