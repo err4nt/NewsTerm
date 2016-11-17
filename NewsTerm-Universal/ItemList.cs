@@ -31,7 +31,7 @@ namespace NewsTerm_Universal
             _list = new ObservableCollection<ItemModel>();
         }
 
-        public async void Refresh()
+        public async void Refresh(bool removeRead, bool showRead)
         {
             var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
             var feeds = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getFeeds();
@@ -41,14 +41,18 @@ namespace NewsTerm_Universal
                 var existingItem = (from ItemModel selitem in _list where selitem.id == item.id select selitem).FirstOrDefault<ItemModel>();
                 if (existingItem == null)
                 {
+                    if (showRead == false && item.unread == false)
+                        continue;
+
                     var newItem = ItemModel.FromItem(item);
                     var feed = feeds.getFeedForId(item.feedId);
 
                     if (feed != null)
-                        if(feed.faviconLink != null && feed.faviconLink != String.Empty)
+                    {
+                        if (feed.faviconLink != null && feed.faviconLink != String.Empty)
                         {
                             Uri validatedUri;
-                            if(Uri.TryCreate(feed.faviconLink, UriKind.RelativeOrAbsolute, out validatedUri))
+                            if (Uri.TryCreate(feed.faviconLink, UriKind.RelativeOrAbsolute, out validatedUri))
                             {
                                 newItem.favicon = feed.faviconLink;
                             }
@@ -61,7 +65,18 @@ namespace NewsTerm_Universal
                         {
                             newItem.favicon = "https://boingboing.net/favicon.ico";
                         }
+                    }
                     _list.Insert(0, newItem);
+                }
+                else
+                {
+                    if(removeRead)
+                    {
+                        if(item.unread == false)
+                        {
+                            _list.Remove(existingItem);
+                        }
+                    }
                 }
             }
         }

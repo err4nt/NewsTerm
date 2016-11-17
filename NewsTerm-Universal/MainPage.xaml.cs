@@ -41,7 +41,7 @@ namespace NewsTerm_Universal
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            ItemList.getInstance().Refresh();
+            ItemList.getInstance().Refresh(true, false);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -107,7 +107,7 @@ namespace NewsTerm_Universal
                                                                           localSettings.Values["username"] as String,
                                                                           localSettings.Values["password"] as String);
 
-                ItemList.getInstance().Refresh();
+                ItemList.getInstance().Refresh(true, false);
             }
 
             UpdateForVisualState(AdaptiveStates.CurrentState);
@@ -205,7 +205,7 @@ namespace NewsTerm_Universal
 
         private void MasterListView_RefreshRequested(object sender, RefreshRequestedEventArgs e)
         {
-            ItemList.getInstance().Refresh();
+            ItemList.getInstance().Refresh(true, false);
         }
     }
 }
