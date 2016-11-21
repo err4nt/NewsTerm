@@ -34,13 +34,27 @@ namespace NewsTerm_Universal
             this.InitializeComponent();
             localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
-            refreshButton.Click += RefreshButton_Click;
-
+            ItemList.getInstance().RefreshComplete += MainPage_RefreshComplete;
             MasterListView.ItemsSource = ItemList.getInstance().Items;
+        }
+
+        private void MainPage_RefreshComplete(object sender, ItemList.Result resultCondition)
+        {
+            LoadingProcessProgressRing.IsActive = false;
+            if(ItemList.getInstance().Items.Count == 0)
+            {
+                EmptyListText.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                EmptyListText.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
+            EmptyListText.Visibility = Visibility.Collapsed;
+            LoadingProcessProgressRing.IsActive = true;
             ItemList.getInstance().Refresh(true, false);
         }
 
@@ -107,6 +121,7 @@ namespace NewsTerm_Universal
                                                                           localSettings.Values["username"] as String,
                                                                           localSettings.Values["password"] as String);
 
+                LoadingProcessProgressRing.IsActive = true;
                 ItemList.getInstance().Refresh(true, false);
             }
 

@@ -15,11 +15,16 @@ namespace NewsTerm_Universal
         private static ItemList _instance = null;
         private ItemModel _selectedItem = null;
 
-        public delegate void RefreshEventHandler(object sender);
+        public delegate void RefreshEventHandler(object sender, Result resultCondition);
 
         public ObservableCollection<ItemModel> Items { get {return _list;} }
         public ItemModel SelectedItem { get { return _selectedItem; } set { _selectedItem = value; } }
         public event RefreshEventHandler RefreshComplete;
+
+        public enum Result{
+            NoError,
+            ConnectionError,
+        };
 
         public static ItemList getInstance()
         {
@@ -37,6 +42,7 @@ namespace NewsTerm_Universal
 
         public async void Refresh(bool removeRead, bool showRead)
         {
+            var errorCondition = Result.NoError; 
             try
             {
                 var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
@@ -88,13 +94,12 @@ namespace NewsTerm_Universal
             }
             catch
             {
-                //TODO: Set error condition here
                 //TODO: Catch the right exception
+                errorCondition = Result.ConnectionError;
             }
             finally
             {
-                //TODO: Pass error state to handler
-                RefreshComplete?.Invoke(this);
+                RefreshComplete?.Invoke(this, errorCondition);
             }
         }
 

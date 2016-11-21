@@ -80,7 +80,7 @@
         </Grid.ColumnDefinitions>
 
         <CommandBar x:Name="commandBar" x:FieldModifier="Protected" Grid.Row="1">
-            <AppBarButton x:Name="refreshButton" Label="Refresh" Icon="Refresh" />
+            <AppBarButton x:Name="refreshButton" Label="Refresh" Icon="Refresh" Click="RefreshButton_Click"/>
             <AppBarButton x:Name="settingsButton" Label="Settings" Icon="Setting" />
         </CommandBar>
 
@@ -111,8 +111,10 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </ListView.ItemContainerStyle>
-            <ProgressRing Name="LoadingProcessProgressRing" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </ListView>
+
+        <ProgressRing Grid.Row="0" Grid.Column="0" Name="LoadingProcessProgressRing" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Name="EmptyListText" Text="No news is good news" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
 
         <ContentPresenter
             x:Name="DetailContentPresenter"
