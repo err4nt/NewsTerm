@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,8 +15,11 @@ namespace NewsTerm_Universal
         private static ItemList _instance = null;
         private ItemModel _selectedItem = null;
 
+        public delegate void RefreshEventHandler(object sender);
+
         public ObservableCollection<ItemModel> Items { get {return _list;} }
         public ItemModel SelectedItem { get { return _selectedItem; } set { _selectedItem = value; } }
+        public event RefreshEventHandler RefreshComplete;
 
         public static ItemList getInstance()
         {
@@ -33,51 +37,64 @@ namespace NewsTerm_Universal
 
         public async void Refresh(bool removeRead, bool showRead)
         {
-            var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
-            var feeds = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getFeeds();
-
-            foreach (var item in backendItems.items)
+            try
             {
-                var existingItem = (from ItemModel selitem in _list where selitem.id == item.id select selitem).FirstOrDefault<ItemModel>();
-                if (existingItem == null)
+                var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
+                var feeds = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getFeeds();
+
+                foreach (var item in backendItems.items)
                 {
-                    if (showRead == false && item.unread == false)
-                        continue;
-
-                    var newItem = ItemModel.FromItem(item);
-                    var feed = feeds.getFeedForId(item.feedId);
-
-                    if (feed != null)
+                    var existingItem = (from ItemModel selitem in _list where selitem.id == item.id select selitem).FirstOrDefault<ItemModel>();
+                    if (existingItem == null)
                     {
-                        if (feed.faviconLink != null && feed.faviconLink != String.Empty)
+                        if (showRead == false && item.unread == false)
+                            continue;
+
+                        var newItem = ItemModel.FromItem(item);
+                        var feed = feeds.getFeedForId(item.feedId);
+
+                        if (feed != null)
                         {
-                            Uri validatedUri;
-                            if (Uri.TryCreate(feed.faviconLink, UriKind.RelativeOrAbsolute, out validatedUri))
+                            if (feed.faviconLink != null && feed.faviconLink != String.Empty)
                             {
-                                newItem.favicon = feed.faviconLink;
+                                Uri validatedUri;
+                                if (Uri.TryCreate(feed.faviconLink, UriKind.RelativeOrAbsolute, out validatedUri))
+                                {
+                                    newItem.favicon = feed.faviconLink;
+                                }
+                                else
+                                {
+                                    newItem.favicon = "https://boingboing.net/favicon.ico";
+                                }
                             }
                             else
                             {
                                 newItem.favicon = "https://boingboing.net/favicon.ico";
                             }
                         }
-                        else
-                        {
-                            newItem.favicon = "https://boingboing.net/favicon.ico";
-                        }
+                        _list.Insert(0, newItem);
                     }
-                    _list.Insert(0, newItem);
-                }
-                else
-                {
-                    if(removeRead)
+                    else
                     {
-                        if(item.unread == false)
+                        if (removeRead)
                         {
-                            _list.Remove(existingItem);
+                            if (item.unread == false)
+                            {
+                                _list.Remove(existingItem);
+                            }
                         }
                     }
                 }
+            }
+            catch
+            {
+                //TODO: Set error condition here
+                //TODO: Catch the right exception
+            }
+            finally
+            {
+                //TODO: Pass error state to handler
+                RefreshComplete?.Invoke(this);
             }
         }
 

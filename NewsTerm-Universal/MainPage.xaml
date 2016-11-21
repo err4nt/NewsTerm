@@ -46,7 +46,7 @@
             </Grid>
         </DataTemplate>
     </Page.Resources>
-    <Grid x:Name="LayoutRoot" Loaded="LayoutRoot_Loaded">
+    <Grid x:Name="LayoutRoot" Loaded="LayoutRoot_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="AdaptiveStates" CurrentStateChanged="AdaptiveStates_CurrentStateChanged">
                 <VisualState x:Name="DefaultState">
@@ -111,6 +111,7 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </ListView.ItemContainerStyle>
+            <ProgressRing Name="LoadingProcessProgressRing" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </ListView>
 
         <ContentPresenter
