@@ -41,21 +41,33 @@ namespace NewsTerm_Universal
         private void MainPage_RefreshComplete(object sender, ItemList.Result resultCondition)
         {
             LoadingProcessProgressRing.IsActive = false;
-            if(ItemList.getInstance().Items.Count == 0)
+
+            if (resultCondition == ItemList.Result.NoError)
             {
-                EmptyListText.Visibility = Visibility.Visible;
+                ErrorListText.Visibility = Visibility.Collapsed;
+                if (ItemList.getInstance().Items.Count == 0)
+                {
+                    EmptyListText.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    EmptyListText.Visibility = Visibility.Collapsed;
+                }
             }
             else
             {
-                EmptyListText.Visibility = Visibility.Collapsed;
+                ErrorListText.Visibility = Visibility.Visible;
             }
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        {
+        { 
             EmptyListText.Visibility = Visibility.Collapsed;
+            ErrorListText.Visibility = Visibility.Collapsed;
             LoadingProcessProgressRing.IsActive = true;
-            ItemList.getInstance().Refresh(true, false);
+            ItemList.getInstance().RemoveRead();
+            NextcloudNewsInterface.NextcloudNewsInterface.getInstance().invalidateCache();
+            ItemList.getInstance().Refresh(false);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -76,45 +88,7 @@ namespace NewsTerm_Universal
                       localSettings.Values.ContainsKey("password") &&
                       localSettings.Values.ContainsKey("host")))
                 {
-                    //TODO: Pop up a dialog asking for login information
-                    var dialog = new ContentDialog()
-                    {
-                        Title = "Nextcloud News Login",
-                        MaxWidth = this.ActualWidth
-                    };
-
-                    var panel = new StackPanel();
-
-                    var hostBox = new TextBox()
-                    {
-                        PlaceholderText = "https://yourdomain.tld"
-                    };
-                    var usernameBox = new TextBox()
-                    {
-                        PlaceholderText = "username"
-                    };
-                    var passwordBox = new PasswordBox()
-                    {
-                        PlaceholderText = "password"
-                    };
-
-                    panel.Children.Add(hostBox);
-                    panel.Children.Add(usernameBox);
-                    panel.Children.Add(passwordBox);
-
-                    dialog.Content = panel;
-                    dialog.PrimaryButtonText = "Log in";
-                    dialog.IsPrimaryButtonEnabled = true;
-                    dialog.PrimaryButtonClick += delegate
-                    {
-                        localSettings.Values["host"] = hostBox.Text;
-                        localSettings.Values["username"] = usernameBox.Text;
-                        localSettings.Values["password"] = passwordBox.Password;
-                    };
-
-                    dialog.SecondaryButtonText = "Cancel";
-
-                    var result = await dialog.ShowAsync();
+                    this.Frame.Navigate(typeof(SettingsPage));
                 }
 
                 NextcloudNewsInterface.NextcloudNewsInterface.getInstance(localSettings.Values["host"] as String,
@@ -122,7 +96,7 @@ namespace NewsTerm_Universal
                                                                           localSettings.Values["password"] as String);
 
                 LoadingProcessProgressRing.IsActive = true;
-                ItemList.getInstance().Refresh(true, false);
+                ItemList.getInstance().Refresh(false);
             }
 
             UpdateForVisualState(AdaptiveStates.CurrentState);
@@ -220,7 +194,11 @@ namespace NewsTerm_Universal
 
         private void MasterListView_RefreshRequested(object sender, RefreshRequestedEventArgs e)
         {
-            ItemList.getInstance().Refresh(true, false);
+        }
+
+        private void settingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(SettingsPage));
         }
     }
 }

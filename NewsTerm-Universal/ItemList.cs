@@ -40,7 +40,30 @@ namespace NewsTerm_Universal
             _list = new ObservableCollection<ItemModel>();
         }
 
-        public async void Refresh(bool removeRead, bool showRead)
+        public async void RemoveRead()
+        {
+            try
+            {
+                var backendItems = await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems();
+
+                foreach (var item in backendItems.items)
+                {
+                    var existingItem = (from ItemModel selitem in _list where selitem.id == item.id && item.unread == false select selitem).FirstOrDefault<ItemModel>();
+                    if (existingItem != null)
+                    {
+                        _list.Remove(existingItem);
+                    }
+                }
+            }
+            catch
+            {
+                //DJ: Calling the RefreshComplete callback here is valid, since erroring out here means the refresh can not continue.
+                //TODO: Catch the right exception
+                RefreshComplete?.Invoke(this, Result.ConnectionError);
+            }
+        }
+
+        public async void Refresh(bool showRead)
         {
             var errorCondition = Result.NoError; 
             try
@@ -64,6 +87,7 @@ namespace NewsTerm_Universal
                             if (feed.faviconLink != null && feed.faviconLink != String.Empty)
                             {
                                 Uri validatedUri;
+                                //TODO: Need to also verify that the protocol part of the url is http or https
                                 if (Uri.TryCreate(feed.faviconLink, UriKind.RelativeOrAbsolute, out validatedUri))
                                 {
                                     newItem.favicon = feed.faviconLink;
@@ -79,16 +103,6 @@ namespace NewsTerm_Universal
                             }
                         }
                         _list.Insert(0, newItem);
-                    }
-                    else
-                    {
-                        if (removeRead)
-                        {
-                            if (item.unread == false)
-                            {
-                                _list.Remove(existingItem);
-                            }
-                        }
                     }
                 }
             }

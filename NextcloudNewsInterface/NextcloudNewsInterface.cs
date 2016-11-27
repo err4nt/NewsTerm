@@ -135,5 +135,10 @@ namespace NextcloudNewsInterface
                 item.unread = false;
             }
         }
+
+        public void invalidateCache()
+        {
+            itemCache = null;
+        }
     }
 }
