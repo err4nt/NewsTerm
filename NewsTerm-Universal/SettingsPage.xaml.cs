@@ -36,13 +36,26 @@ namespace NewsTerm_Universal
         {
             base.OnNavigatedTo(e);
 
-            if ((localSettings.Values.ContainsKey("username") &&
-                 localSettings.Values.ContainsKey("password") &&
-                 localSettings.Values.ContainsKey("host")))
+            if (localSettings.Values.ContainsKey("darkTheme") && ((bool)localSettings.Values["darkTheme"]) == true)
+                RequestedTheme = ElementTheme.Dark;
+            else
+                RequestedTheme = ElementTheme.Light;
+
+            if (localSettings.Values.ContainsKey("username"))
+            {
+                usernameTextBox.Text = localSettings.Values["username"] as String;
+            }
+            if (localSettings.Values.ContainsKey("host"))
             {
                 urlTextBox.Text = localSettings.Values["host"] as String;
-                usernameTextBox.Text = localSettings.Values["username"] as String;
+            }
+            if (localSettings.Values.ContainsKey("password"))
+            {
                 passwordBox.Password = localSettings.Values["password"] as String;
+            }
+            if (localSettings.Values.ContainsKey("darkTheme"))
+            {
+                darkThemeCheckBox.IsChecked = ((bool)localSettings.Values["darkTheme"]);
             }
         }
 
@@ -51,6 +64,7 @@ namespace NewsTerm_Universal
             localSettings.Values["host"] = urlTextBox.Text;
             localSettings.Values["username"] = usernameTextBox.Text;
             localSettings.Values["password"] = passwordBox.Password;
+            localSettings.Values["darkTheme"] = darkThemeCheckBox.IsChecked;
 
             ((Frame)Window.Current.Content).GoBack();
         }
@@ -58,6 +72,18 @@ namespace NewsTerm_Universal
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             ((Frame)Window.Current.Content).GoBack();
+        }
+
+        private void darkThemeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if(darkThemeCheckBox.IsChecked == true)
+            {
+                RequestedTheme = ElementTheme.Dark;
+            }
+            else
+            {
+                RequestedTheme = ElementTheme.Light;
+            }
         }
     }
 }

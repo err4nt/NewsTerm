@@ -74,6 +74,11 @@ namespace NewsTerm_Universal
         {
             base.OnNavigatedTo(e);
 
+            if (localSettings.Values.ContainsKey("darkTheme") && ((bool)localSettings.Values["darkTheme"]) == true)
+                RequestedTheme = ElementTheme.Dark;
+            else
+                RequestedTheme = ElementTheme.Light;
+
             if (e.Parameter != null && e.Parameter as String != String.Empty)
             {
                 var selectedItem = ItemList.getInstance().GetItemById((int)e.Parameter);

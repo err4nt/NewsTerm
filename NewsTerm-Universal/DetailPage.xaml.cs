@@ -6,9 +6,9 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
-using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
@@ -28,8 +28,6 @@ namespace NewsTerm_Universal
     {
         private static DependencyProperty s_itemProperty
             = DependencyProperty.Register("Item", typeof(ItemModel), typeof(DetailPage), new PropertyMetadata(null));
-
-        private List<NextcloudNewsInterface.NextcloudNewsItem> items;
 
         public static DependencyProperty ItemProperty
         {
@@ -51,7 +49,12 @@ namespace NewsTerm_Universal
         {
             base.OnNavigatedTo(e);
 
-            if(ItemList.getInstance().SelectedItem != null)
+            if (ApplicationData.Current.LocalSettings.Values.ContainsKey("darkTheme") && ((bool)ApplicationData.Current.LocalSettings.Values["darkTheme"]) == true)
+                RequestedTheme = ElementTheme.Dark;
+            else
+                RequestedTheme = ElementTheme.Light;
+
+            if (ItemList.getInstance().SelectedItem != null)
             {
                 Item = ItemList.getInstance().SelectedItem;
                 ItemList.getInstance().MarkItemRead(Item);
