@@ -7,7 +7,15 @@
     xmlns:local="using:NewsTerm_Universal"
     xmlns:data="using:NewsTerm_Universal.ViewModels"
     xmlns:common="using:WinRT_RichTextBlock.Html2Xaml.Common"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    NavigationCacheMode="Enabled"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    
+    <Page.Transitions>
+        <TransitionCollection>
+            <NavigationThemeTransition />
+        </TransitionCollection>
+    </Page.Transitions>
 
     <Page.Resources>
         <DataTemplate x:Key="ItemListTemplate" x:DataType="data:ItemModel">
@@ -102,7 +110,6 @@
         <ListView
             x:Name="MasterListView"
             Grid.Row="0"
-            ItemContainerTransitions="{x:Null}"
             ItemTemplate="{StaticResource ItemListTemplate}"
             IsItemClickEnabled="True"
             ItemClick="MasterListView_ItemClick">

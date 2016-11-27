@@ -33,6 +33,7 @@
             local:WebViewHelper.Html="{x:Bind Item.body, Mode=OneWay}"
             Margin="0,9" 
             Grid.Row="1" 
-            ScriptNotify="WebView_ScriptNotify"/>
+            ScriptNotify="WebView_ScriptNotify"
+            EntranceNavigationTransitionInfo.IsTargetElement="True"/>
     </Grid>
 </Page>

@@ -5,7 +5,16 @@
     xmlns:local="using:NewsTerm_Universal"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    NavigationCacheMode="Enabled"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Transitions>
+        <TransitionCollection>
+            <NavigationThemeTransition />
+        </TransitionCollection>
+    </Page.Transitions>
+
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.Content>
@@ -16,11 +25,10 @@
         </CommandBar>
     </Page.BottomAppBar>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBox x:Name="urlTextBox" HorizontalAlignment="Left" Margin="10,78,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="340" PlaceholderText="https://yourdomain.tld"/>
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Settings" VerticalAlignment="Top" Style="{ThemeResource HeaderTextBlockStyle}"/>
-        <TextBox x:Name="usernameTextBox" HorizontalAlignment="Left" Margin="10,115,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="340" PlaceholderText="Username"/>
-        <PasswordBox x:Name="passwordBox" HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" Width="340" PlaceholderText="Password"/>
-
-    </Grid>
+    <StackPanel EntranceNavigationTransitionInfo.IsTargetElement="True">
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Settings" VerticalAlignment="Top" Style="{ThemeResource HeaderTextBlockStyle}" Margin="10,0,0,0"/>
+        <TextBox x:Name="urlTextBox" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="340" PlaceholderText="https://yourdomain.tld" Margin="10,10,0,10"/>
+        <TextBox x:Name="usernameTextBox" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="340" PlaceholderText="Username" Margin="10,0,0,10"/>
+        <PasswordBox x:Name="passwordBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="340" PlaceholderText="Password" Margin="10,0,0,10"/>
+    </StackPanel>
 </Page>

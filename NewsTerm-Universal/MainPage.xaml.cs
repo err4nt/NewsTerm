@@ -70,7 +70,7 @@ namespace NewsTerm_Universal
             ItemList.getInstance().Refresh(false);
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
