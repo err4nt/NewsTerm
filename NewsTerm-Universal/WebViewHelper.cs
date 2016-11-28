@@ -32,8 +32,6 @@ namespace NewsTerm_Universal
             if (webview == null)
                 return;
 
-           
-
             var hammer_lib_file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(@"Assets\hammer.min.js");
             var hammer_shim_file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(@"Assets\hammer_shim.js");
 

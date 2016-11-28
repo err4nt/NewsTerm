@@ -31,5 +31,20 @@
         <TextBox x:Name="usernameTextBox" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="340" PlaceholderText="Username" Margin="10,0,0,10"/>
         <PasswordBox x:Name="passwordBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="340" PlaceholderText="Password" Margin="10,0,0,10"/>
         <CheckBox x:Name="darkThemeCheckBox" Content="Dark Theme" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0,0,10" Checked="darkThemeCheckBox_Checked" Unchecked="darkThemeCheckBox_Checked"/>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="textBlock1" TextWrapping="Wrap" Text="Refresh" VerticalAlignment="Center" Margin="10,0,10,0"/>
+            <ComboBox x:Name="comboBox" HorizontalAlignment="Right" VerticalAlignment="Center" Width="282" Margin="0,0,10,0">
+                <ComboBoxItem Name="OneMinuteItem" Content="1 Minute"/>
+                <ComboBoxItem Name="FiveMinuteItem" Content="5 Minutes"/>
+                <ComboBoxItem Name="TenMinuteItem" Content="10 Minutes"/>
+                <ComboBoxItem Name="FifteenMinuteItem" Content="15 Minutes"/>
+                <ComboBoxItem Name="ThirtyMinuteItem" Content="30 Minutes"/>
+                <ComboBoxItem Name="OneHourItem" Content="1 Hour"/>
+                <ComboBoxItem Name="EightHourItem" Content="8 Hours"/>
+                <ComboBoxItem Name="TwentyFourHourItem" Content="24 Hours"/>
+                <ComboBoxItem Name="NoRefreshItem" Content="Manual"/>
+                <ComboBoxItem/>
+            </ComboBox>
+        </StackPanel>
     </StackPanel>
 </Page>
