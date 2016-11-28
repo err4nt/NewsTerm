@@ -125,6 +125,7 @@ namespace NewsTerm_Universal
         public async void MarkItemRead(ItemModel item)
         {
             var rawItem = (await NextcloudNewsInterface.NextcloudNewsInterface.getInstance().getItems()).getForId(item.id);
+            item.unread = false;
             NextcloudNewsInterface.NextcloudNewsInterface.getInstance().markItemRead(rawItem);
         }
 
