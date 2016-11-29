@@ -148,5 +148,25 @@ namespace NewsTerm_Universal
             }
             return null;
         }
+
+        public bool HaveNextItem()
+        {
+            var index = _list.IndexOf(_selectedItem) + 1;
+            if (index < _list.Count)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool HavePreviousItem()
+        {
+            var index = _list.IndexOf(_selectedItem) - 1;
+            if (index >= 0)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

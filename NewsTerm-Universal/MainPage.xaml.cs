@@ -40,6 +40,10 @@ namespace NewsTerm_Universal
 
         private void MainPage_RefreshComplete(object sender, ItemList.Result resultCondition)
         {
+            //TODO: ErrorListText needs to go, we should have a popup notification (not a dialog)
+            //to incicate error. Problem if we try to show ErrorListText and there are elements in
+            //list
+
             LoadingProcessProgressRing.IsActive = false;
 
             if (resultCondition == ItemList.Result.NoError)
@@ -177,12 +181,15 @@ namespace NewsTerm_Universal
             var type = e.Value;
             if (type == "left")
             {
-                MasterListView.SelectedIndex++;
+                var nextItem = ItemList.getInstance().GetNextItem();
+                if(nextItem != null)
+                    ItemList.getInstance().SelectedItem = nextItem;
             }
             else if(type == "right")
             {
-                if(MasterListView.SelectedIndex > 0)
-                    MasterListView.SelectedIndex--;
+                var prevItem = ItemList.getInstance().GetPreviousItem();
+                if (prevItem != null)
+                    ItemList.getInstance().SelectedItem = prevItem;
             }
         }
 
@@ -194,6 +201,30 @@ namespace NewsTerm_Universal
             {
                 ItemList.getInstance().SelectedItem = newItem;
                 ItemList.getInstance().MarkItemRead(newItem);
+
+                shareButton.IsEnabled = true;
+
+                if (ItemList.getInstance().HaveNextItem())
+                {
+                    nextButton.IsEnabled = true;
+                }
+                else
+                {
+                    nextButton.IsEnabled = false;
+                }
+
+                if (ItemList.getInstance().HavePreviousItem())
+                {
+                    prevButton.IsEnabled = true;
+                }
+                else
+                {
+                    prevButton.IsEnabled = false;
+                }
+            }
+            else
+            {
+                shareButton.IsEnabled = false;
             }
         }
 
@@ -204,6 +235,28 @@ namespace NewsTerm_Universal
         private void settingsButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(SettingsPage));
+        }
+
+        private void nextButton_Click(object sender, RoutedEventArgs e)
+        {
+            var nextItem = ItemList.getInstance().GetNextItem();
+            if (nextItem != null)
+            {
+                ItemList.getInstance().SelectedItem = nextItem;
+                MasterListView.SelectedItem = nextItem;
+                DetailContentPresenter.Content = nextItem;
+            }
+        }
+
+        private void prevButton_Click(object sender, RoutedEventArgs e)
+        {
+            var prevItem = ItemList.getInstance().GetPreviousItem();
+            if (prevItem != null)
+            {
+                ItemList.getInstance().SelectedItem = prevItem;
+                MasterListView.SelectedItem = prevItem;
+                DetailContentPresenter.Content = prevItem;
+            }
         }
     }
 }

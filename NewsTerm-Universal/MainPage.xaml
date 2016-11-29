@@ -40,6 +40,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Margin="0,8"
@@ -55,90 +56,102 @@
             </Grid>
         </DataTemplate>
     </Page.Resources>
-    <Grid x:Name="LayoutRoot" Loaded="LayoutRoot_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup x:Name="AdaptiveStates" CurrentStateChanged="AdaptiveStates_CurrentStateChanged">
-                <VisualState x:Name="DefaultState">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="720" />
-                    </VisualState.StateTriggers>
-                </VisualState>
 
-                <VisualState x:Name="NarrowState">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="0" />
-                    </VisualState.StateTriggers>
-
-                    <VisualState.Setters>
-                        <Setter Target="MasterColumn.Width" Value="*" />
-                        <Setter Target="DetailColumn.Width" Value="0" />
-                        <Setter Target="MasterListView.SelectionMode" Value="None" />
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
-
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        
+        <Grid x:Name="LayoutRoot" Loaded="LayoutRoot_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Grid.Row="0">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="AdaptiveStates" CurrentStateChanged="AdaptiveStates_CurrentStateChanged">
+                    <VisualState x:Name="DefaultState">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="720" />
+                        </VisualState.StateTriggers>
+                    </VisualState>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="MasterColumn" Width="480" />
-            <ColumnDefinition x:Name="DetailColumn" Width="*" />
-        </Grid.ColumnDefinitions>
+                    <VisualState x:Name="NarrowState">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
 
+                        <VisualState.Setters>
+                            <Setter Target="MasterColumn.Width" Value="*" />
+                            <Setter Target="DetailColumn.Width" Value="0" />
+                            <Setter Target="MasterListView.SelectionMode" Value="None" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="MasterColumn" Width="480" />
+                <ColumnDefinition x:Name="DetailColumn" Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--<local:RefreshableListView
+                x:Name="MasterListView"
+                Grid.Row="0"
+                ItemContainerTransitions="{x:Null}"
+                ItemTemplate="{StaticResource ItemListTemplate}"
+                IsItemClickEnabled="True"
+                ItemClick="MasterListView_ItemClick"
+                RefreshRequested="MasterListView_RefreshRequested">
+                <local:RefreshableListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </local:RefreshableListView.ItemContainerStyle>
+            </local:RefreshableListView>-->
+
+            <ListView
+                x:Name="MasterListView"
+                Grid.Row="0"
+                ItemTemplate="{StaticResource ItemListTemplate}"
+                IsItemClickEnabled="True"
+                ItemClick="MasterListView_ItemClick">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <ProgressRing Grid.Row="0" Grid.Column="0" Name="LoadingProcessProgressRing" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Name="EmptyListText" Text="No news is good news" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Name="ErrorListText" Text="Error connecting to server" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+
+            <ContentPresenter
+                x:Name="DetailContentPresenter"
+                Grid.Column="1"
+                Grid.RowSpan="2"
+                BorderThickness="1,0,0,0"
+                Padding="24,0"
+                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                Content="{x:Bind MasterListView.SelectedItem, Mode=OneWay}"
+                ContentTemplate="{StaticResource DetailTemplate}"
+                DataContextChanged="DetailContentPresenter_DataContextChanged">
+                <ContentPresenter.ContentTransitions>
+                    <!-- Empty by default. See MasterListView_ItemClick -->
+                    <TransitionCollection />
+                </ContentPresenter.ContentTransitions>
+            </ContentPresenter>
+        </Grid>
         <CommandBar x:Name="commandBar" x:FieldModifier="Protected" Grid.Row="1">
             <AppBarButton x:Name="refreshButton" Label="Refresh" Icon="Refresh" Click="RefreshButton_Click"/>
-            <AppBarButton x:Name="settingsButton" Label="Settings" Icon="Setting" Click="settingsButton_Click"/>
+            <AppBarButton x:Name="shareButton" Label="Share" Icon="OpenWith" Click="RefreshButton_Click" IsEnabled="False"/>
+            <AppBarButton x:Name="prevButton" Label="Previous" Icon="Previous" Click="prevButton_Click" IsEnabled="False"/>
+            <AppBarButton x:Name="nextButton" Label="Next" Icon="Next" Click="nextButton_Click" IsEnabled="False"/>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:Name="settingsButton" HorizontalAlignment="Left" Label="Settings" Icon="Setting" Click="settingsButton_Click"/>
+            </CommandBar.SecondaryCommands>
         </CommandBar>
-
-        <!--<local:RefreshableListView
-            x:Name="MasterListView"
-            Grid.Row="0"
-            ItemContainerTransitions="{x:Null}"
-            ItemTemplate="{StaticResource ItemListTemplate}"
-            IsItemClickEnabled="True"
-            ItemClick="MasterListView_ItemClick"
-            RefreshRequested="MasterListView_RefreshRequested">
-            <local:RefreshableListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </local:RefreshableListView.ItemContainerStyle>
-        </local:RefreshableListView>-->
-
-        <ListView
-            x:Name="MasterListView"
-            Grid.Row="0"
-            ItemTemplate="{StaticResource ItemListTemplate}"
-            IsItemClickEnabled="True"
-            ItemClick="MasterListView_ItemClick">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
-
-        <ProgressRing Grid.Row="0" Grid.Column="0" Name="LoadingProcessProgressRing" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Grid.Row="0" Grid.Column="0" Name="EmptyListText" Text="No news is good news" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
-        <TextBlock Grid.Row="0" Grid.Column="0" Name="ErrorListText" Text="Error connecting to server" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
-
-        <ContentPresenter
-            x:Name="DetailContentPresenter"
-            Grid.Column="1"
-            Grid.RowSpan="2"
-            BorderThickness="1,0,0,0"
-            Padding="24,0"
-            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-            Content="{x:Bind MasterListView.SelectedItem, Mode=OneWay}"
-            ContentTemplate="{StaticResource DetailTemplate}"
-            DataContextChanged="DetailContentPresenter_DataContextChanged">
-            <ContentPresenter.ContentTransitions>
-                <!-- Empty by default. See MasterListView_ItemClick -->
-                <TransitionCollection />
-            </ContentPresenter.ContentTransitions>
-        </ContentPresenter>
     </Grid>
 </Page>
