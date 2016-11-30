@@ -54,11 +54,7 @@ namespace NewsTerm_Universal
             else
                 RequestedTheme = ElementTheme.Light;
 
-            if (ItemList.getInstance().SelectedItem != null)
-            {
-                Item = ItemList.getInstance().SelectedItem;
-                ItemList.getInstance().MarkItemRead(Item);
-            }
+            ItemList.getInstance().SelectedItemChanged += DetailPage_SelectedItemChanged;
 
             var backStack = Frame.BackStack;
             var backStackCount = backStack.Count;
@@ -72,7 +68,7 @@ namespace NewsTerm_Universal
                 // will show the correct item in the side-by-side view.
                 var modifiedEntry = new PageStackEntry(
                     masterPageEntry.SourcePageType,
-                    Item.id,
+                    ItemList.getInstance().SelectedItem.id,
                     masterPageEntry.NavigationTransitionInfo
                     );
                 backStack.Add(modifiedEntry);
@@ -84,10 +80,25 @@ namespace NewsTerm_Universal
             systemNavigationManager.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
         }
 
+        private void DetailPage_SelectedItemChanged(object sender, ItemModel selectedItem)
+        {
+            nextButton.IsEnabled = ItemList.getInstance().HaveNextItem();
+            prevButton.IsEnabled = ItemList.getInstance().HavePreviousItem();
+
+            shareButton.IsEnabled = (selectedItem != null);
+
+            if (selectedItem != null)
+            {
+                Item = selectedItem;
+                ItemList.getInstance().MarkItemRead(selectedItem);
+            }
+        }
+
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
 
+            ItemList.getInstance().SelectedItemChanged -= DetailPage_SelectedItemChanged;
             SystemNavigationManager systemNavigationManager = SystemNavigationManager.GetForCurrentView();
             systemNavigationManager.BackRequested -= DetailPage_BackRequested;
             systemNavigationManager.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
@@ -136,6 +147,15 @@ namespace NewsTerm_Universal
             }
 
             Window.Current.SizeChanged += Window_SizeChanged;
+
+            if (ItemList.getInstance().SelectedItem != null)
+            {
+                //TODO: I don't like setting Item and doing MarkItemRead here
+                Item = ItemList.getInstance().SelectedItem;
+                ItemList.getInstance().MarkItemRead(Item);
+                nextButton.IsEnabled = ItemList.getInstance().HaveNextItem();
+                prevButton.IsEnabled = ItemList.getInstance().HavePreviousItem();
+            } 
         }
 
         private void PageRoot_Unloaded(object sender, RoutedEventArgs e)
@@ -163,7 +183,6 @@ namespace NewsTerm_Universal
                 var newItem = ItemList.getInstance().GetNextItem();
                 if (newItem != null)
                 {
-                    Item = newItem;
                     ItemList.getInstance().SelectedItem = newItem;
                 }
             }
@@ -172,11 +191,9 @@ namespace NewsTerm_Universal
                 var newItem = ItemList.getInstance().GetPreviousItem();
                 if (newItem != null)
                 {
-                    Item = newItem;
                     ItemList.getInstance().SelectedItem = newItem;
                 }
             }
-            ItemList.getInstance().MarkItemRead(Item);
         }
 
         private void DetailPage_BackRequested(object sender, BackRequestedEventArgs e)
@@ -185,6 +202,29 @@ namespace NewsTerm_Universal
             e.Handled = true;
 
             OnBackRequested();
+        }
+
+        private void shareButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void prevButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newItem = ItemList.getInstance().GetPreviousItem();
+            if (newItem != null)
+            {
+                ItemList.getInstance().SelectedItem = newItem;
+            }
+        }
+
+        private void nextButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newItem = ItemList.getInstance().GetNextItem();
+            if (newItem != null)
+            {
+                ItemList.getInstance().SelectedItem = newItem;
+            }
         }
     }
 }

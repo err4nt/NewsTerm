@@ -22,6 +22,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock
             Margin="0,8"
@@ -35,5 +36,10 @@
             Grid.Row="1" 
             ScriptNotify="WebView_ScriptNotify"
             EntranceNavigationTransitionInfo.IsTargetElement="True"/>
+        <CommandBar x:Name="commandBar" x:FieldModifier="Protected" Grid.Row="2">
+            <AppBarButton x:Name="shareButton" Label="Share" Icon="OpenWith" Click="shareButton_Click" IsEnabled="False"/>
+            <AppBarButton x:Name="prevButton" Label="Previous" Icon="Previous" Click="prevButton_Click" IsEnabled="False"/>
+            <AppBarButton x:Name="nextButton" Label="Next" Icon="Next" Click="nextButton_Click" IsEnabled="False"/>
+        </CommandBar>
     </Grid>
 </Page>

@@ -38,6 +38,28 @@ namespace NewsTerm_Universal
             MasterListView.ItemsSource = ItemList.getInstance().Items;
         }
 
+        private void MainPage_SelectedItemChanged(object sender, ItemModel selectedItem)
+        {
+            nextButton.IsEnabled = ItemList.getInstance().HaveNextItem();
+            prevButton.IsEnabled = ItemList.getInstance().HavePreviousItem();
+
+            shareButton.IsEnabled = (selectedItem != null);
+
+            if(selectedItem != null)
+            {
+                MasterListView.SelectedItem = selectedItem;
+                if (AdaptiveStates.CurrentState == NarrowState)
+                {
+                    Frame.Navigate(typeof(DetailPage), null, new SuppressNavigationTransitionInfo());
+                }
+                else
+                {
+                    EnableContentTransitions();
+                }
+                ItemList.getInstance().MarkItemRead(selectedItem);
+            }
+        }
+
         private void MainPage_RefreshComplete(object sender, ItemList.Result resultCondition)
         {
             //TODO: ErrorListText needs to go, we should have a popup notification (not a dialog)
@@ -56,6 +78,7 @@ namespace NewsTerm_Universal
                 else
                 {
                     EmptyListText.Visibility = Visibility.Collapsed;
+                    //TODO: select first item
                 }
             }
             else
@@ -65,11 +88,12 @@ namespace NewsTerm_Universal
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        { 
+        {
             EmptyListText.Visibility = Visibility.Collapsed;
             ErrorListText.Visibility = Visibility.Collapsed;
             LoadingProcessProgressRing.IsActive = true;
             ItemList.getInstance().RemoveRead();
+            ItemList.getInstance().SelectedItem = null;
             NextcloudNewsInterface.NextcloudNewsInterface.getInstance().invalidateCache();
             ItemList.getInstance().Refresh(false);
         }
@@ -77,6 +101,8 @@ namespace NewsTerm_Universal
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+
+            ItemList.getInstance().SelectedItemChanged += MainPage_SelectedItemChanged;
 
             if (localSettings.Values.ContainsKey("darkTheme") && ((bool)localSettings.Values["darkTheme"]) == true)
                 RequestedTheme = ElementTheme.Dark;
@@ -115,6 +141,13 @@ namespace NewsTerm_Universal
             DisableContentTransitions();
         }
 
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+
+            ItemList.getInstance().SelectedItemChanged -= MainPage_SelectedItemChanged;
+        }
+
         private void UpdateForVisualState(VisualState newState, VisualState oldState = null)
         {
             var isNarrow = newState == NarrowState;
@@ -129,6 +162,19 @@ namespace NewsTerm_Universal
             if (DetailContentPresenter != null)
             {
                 EntranceNavigationTransitionInfo.SetIsTargetElement(DetailContentPresenter, !isNarrow);
+            }
+
+            if(isNarrow)
+            {
+                shareButton.Visibility = Visibility.Collapsed;
+                nextButton.Visibility = Visibility.Collapsed;
+                prevButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                shareButton.Visibility = Visibility.Visible;
+                nextButton.Visibility = Visibility.Visible;
+                prevButton.Visibility = Visibility.Visible;
             }
         }
 
@@ -149,15 +195,14 @@ namespace NewsTerm_Universal
             var item = e.ClickedItem as ItemModel;
             if (item != null)
                 ItemList.getInstance().SelectedItem = item;
-            if(AdaptiveStates.CurrentState == NarrowState)
-            {
-                //item.id is pretty useless here
-                Frame.Navigate(typeof(DetailPage), item.id, new SuppressNavigationTransitionInfo());
-            }
-            else
-            {
-                EnableContentTransitions();
-            }
+            //if(AdaptiveStates.CurrentState == NarrowState)
+            //{
+            //    Frame.Navigate(typeof(DetailPage), null, new SuppressNavigationTransitionInfo());
+            //}
+            //else
+            //{
+            //    EnableContentTransitions();
+            //}
         }
 
         private void EnableContentTransitions()
@@ -195,36 +240,11 @@ namespace NewsTerm_Universal
 
         private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
+            //TODO: Clear this out if we aren't using it
             var newItem = args.NewValue as ItemModel;
 
-            if(newItem != null)
+            if (newItem != null)
             {
-                ItemList.getInstance().SelectedItem = newItem;
-                ItemList.getInstance().MarkItemRead(newItem);
-
-                shareButton.IsEnabled = true;
-
-                if (ItemList.getInstance().HaveNextItem())
-                {
-                    nextButton.IsEnabled = true;
-                }
-                else
-                {
-                    nextButton.IsEnabled = false;
-                }
-
-                if (ItemList.getInstance().HavePreviousItem())
-                {
-                    prevButton.IsEnabled = true;
-                }
-                else
-                {
-                    prevButton.IsEnabled = false;
-                }
-            }
-            else
-            {
-                shareButton.IsEnabled = false;
             }
         }
 
@@ -243,7 +263,6 @@ namespace NewsTerm_Universal
             if (nextItem != null)
             {
                 ItemList.getInstance().SelectedItem = nextItem;
-                MasterListView.SelectedItem = nextItem;
                 DetailContentPresenter.Content = nextItem;
             }
         }
@@ -254,7 +273,6 @@ namespace NewsTerm_Universal
             if (prevItem != null)
             {
                 ItemList.getInstance().SelectedItem = prevItem;
-                MasterListView.SelectedItem = prevItem;
                 DetailContentPresenter.Content = prevItem;
             }
         }

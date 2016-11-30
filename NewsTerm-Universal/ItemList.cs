@@ -16,10 +16,12 @@ namespace NewsTerm_Universal
         private ItemModel _selectedItem = null;
 
         public delegate void RefreshEventHandler(object sender, Result resultCondition);
+        public delegate void SelectedItemChangedHandler(object sender, ItemModel selectedItem);
 
         public ObservableCollection<ItemModel> Items { get {return _list;} }
-        public ItemModel SelectedItem { get { return _selectedItem; } set { _selectedItem = value; } }
+        public ItemModel SelectedItem { get { return _selectedItem; } set { _selectedItem = value; SelectedItemChanged?.Invoke(this, _selectedItem); } }
         public event RefreshEventHandler RefreshComplete;
+        public event SelectedItemChangedHandler SelectedItemChanged;
 
         public enum Result{
             NoError,
