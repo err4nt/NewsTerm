@@ -9,6 +9,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -98,7 +99,7 @@ namespace NewsTerm_Universal
             ItemList.getInstance().Refresh(false);
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
@@ -119,16 +120,18 @@ namespace NewsTerm_Universal
             }
             else
             {
-                if (!(localSettings.Values.ContainsKey("username") &&
-                      localSettings.Values.ContainsKey("password") &&
-                      localSettings.Values.ContainsKey("host")))
+                try
                 {
-                    this.Frame.Navigate(typeof(SettingsPage));
+                    NextcloudNewsInterface.NextcloudNewsInterface.getInstance(localSettings.Values["host"] as String,
+                                                                              localSettings.Values["username"] as String,
+                                                                              localSettings.Values["password"] as String);
                 }
-
-                NextcloudNewsInterface.NextcloudNewsInterface.getInstance(localSettings.Values["host"] as String,
-                                                                          localSettings.Values["username"] as String,
-                                                                          localSettings.Values["password"] as String);
+                catch
+                {
+                    //TODO: This needs to be a non-generic exception
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                            () => this.Frame.Navigate(typeof(SettingsPage)));
+                }
 
                 LoadingProcessProgressRing.IsActive = true;
                 ItemList.getInstance().Refresh(false);
